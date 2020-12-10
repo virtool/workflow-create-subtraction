@@ -33,6 +33,16 @@ async def calculate_fasta_gc(path):
 
 
 def copy_or_decompress(path: str, target: str, proc: int):
+    """
+    Copy the file at `path` to `target`. Decompress the file on-the-fly if it is not already compressed.
+
+    This function will make use of `pigz` for decompression. Pass a `proc` number to assign workers to the `pigz` process.
+
+    :param path: the path to copy from
+    :param target: the path to copy to
+    :param proc: the number of worker processes to allow for pigz
+
+    """
     if virtool_core.utils.is_gzipped(path):
         virtool_core.utils.decompress_file(path, target, proc)
     else:
