@@ -1,12 +1,10 @@
-import aiofiles
 import os
 import shutil
 
 
 from virtool_core.utils import compress_file, rm
-from virtool_workflow import startup, step, cleanup
+from virtool_workflow import startup, step, hooks
 from virtool_workflow.storage.paths import data_path, temp_path
-from virtool_workflow import hooks
 
 import utils
 
