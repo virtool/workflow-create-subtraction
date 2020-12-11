@@ -12,7 +12,9 @@ PACKAGES = find_packages(exclude="tests")
 
 
 INSTALL_REQUIRES = [
-    "virtool-workflow==0.2.0"
+    "virtool-workflow==0.2.0",
+    "aiofiles==0.6.0",
+    "pytest==6.1.2",
 ]
 
 setup(
