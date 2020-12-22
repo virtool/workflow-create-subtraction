@@ -20,7 +20,7 @@ async def make_subtraction_dir(job_params, run_in_executor):
         exist_ok=True
     )
 
-    return "make_subtraction_dir completed"
+    return "make_subtraction_dir step completed"
 
 
 @step
@@ -35,7 +35,7 @@ async def unpack(job_params, number_of_processes, run_in_executor):
         job_params["temp_fasta_path"],
         number_of_processes
     )
-    return "unpack completed"
+    return "unpack step completed"
 
 
 @step
@@ -53,7 +53,7 @@ async def set_stats(job_params, db):
         }
     })
 
-    return "set_stats completed"
+    return "set_stats step completed"
 
 
 @step
@@ -78,7 +78,7 @@ async def bowtie_build(db, job_params, number_of_processes, run_subprocess):
         }
     })
 
-    return "bowtie_build completed"
+    return "bowtie_build step completed"
 
 
 @step
@@ -105,7 +105,7 @@ async def compress(job_params, number_of_processes, run_in_executor):
         job_params["subtraction_path"]
     )
 
-    return "compress completed"
+    return "compress step completed"
 
 
 @cleanup
@@ -126,4 +126,4 @@ async def delete_subtraction(db, job_params, run_in_executor):
 
     await db.subtraction.delete_one({"_id": job_params["subtraction_id"]})
 
-    return "delete_subtraction completed"
+    return "delete_subtraction step completed"
