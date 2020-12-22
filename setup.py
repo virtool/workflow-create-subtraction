@@ -1,7 +1,7 @@
 from pathlib import Path
 from setuptools import setup, find_packages
 
-AUTHORS = ["Ian Boyes", "Blake Smith"]
+AUTHORS = ["Tiansheng Sui"]
 
 CLASSIFIERS = [
     "Topic :: Software Development :: Libraries",
@@ -12,9 +12,7 @@ PACKAGES = find_packages(exclude="tests")
 
 
 INSTALL_REQUIRES = [
-    "virtool-workflow==0.2.0",
-    "aiofiles==0.6.0",
-    "pytest==6.1.2",
+    "virtool-workflow==0.3.0"
 ]
 
 setup(
