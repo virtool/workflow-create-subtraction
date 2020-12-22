@@ -3,7 +3,6 @@ import shutil
 
 from virtool_core.utils import compress_file, rm
 from virtool_workflow import step, cleanup
-from virtool_workflow.storage.paths import data_path, temp_path
 
 import utils
 

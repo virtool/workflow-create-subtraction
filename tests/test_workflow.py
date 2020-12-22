@@ -2,7 +2,6 @@ import os
 
 import pytest
 
-from virtool_workflow.execution.run_in_executor import run_in_executor
 from virtool_workflow.fixtures.scope import WorkflowFixtureScope
 
 import workflow
