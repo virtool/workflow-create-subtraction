@@ -1,37 +1,11 @@
 import os
 import shutil
 
-
 from virtool_core.utils import compress_file, rm
-from virtool_workflow import startup, step, hooks
+from virtool_workflow import step, cleanup
 from virtool_workflow.storage.paths import data_path, temp_path
 
 import utils
-
-
-@startup
-async def clean_up(db, job_params, run_in_executor):
-    """
-    Clean up if the job process encounters an error or is cancelled. Removes the host document from the database
-    and deletes any index files.
-
-    """
-
-    @hooks.on_cancelled
-    @hooks.on_failure
-    async def delete_subtraction():
-        try:
-            await run_in_executor(
-                rm,
-                job_params["subtraction_path"],
-                True
-            )
-        except FileNotFoundError:
-            pass
-
-        await db.subtraction.delete_one({"_id": job_params["subtraction_id"]})
-
-        return "delete_subtraction completed"
 
 
 @step
@@ -132,3 +106,24 @@ async def compress(job_params, number_of_processes, run_in_executor):
     )
 
     return "compress completed"
+
+
+@cleanup
+async def delete_subtraction(db, job_params, run_in_executor):
+    """
+    Clean up if the job process encounters an error or is cancelled. Removes the host document from the database
+    and deletes any index files.
+
+    """
+    try:
+        await run_in_executor(
+            rm,
+            job_params["subtraction_path"],
+            True
+        )
+    except FileNotFoundError:
+        pass
+
+    await db.subtraction.delete_one({"_id": job_params["subtraction_id"]})
+
+    return "delete_subtraction completed"
