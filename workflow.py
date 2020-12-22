@@ -34,47 +34,6 @@ async def clean_up(db, job_params, run_in_executor):
         return "delete_subtraction completed"
 
 
-@startup
-def check_db(job_params, data_path, temp_path):
-    subtraction_id = job_params["subtraction_id"]
-    file_id = job_params["file_id"]
-
-    subtraction_path = os.path.join(
-        data_path,
-        "subtractions",
-        subtraction_id.replace(" ", "_").lower()
-    )
-
-    temp_subtraction_path = os.path.join(
-        temp_path,
-        subtraction_id
-    )
-
-    job_params.update({
-        "subtraction_path": subtraction_path,
-        "temp_subtraction_path": temp_subtraction_path,
-
-        # The path to the uploaded FASTA file to be used for creating a subtraction.
-        "file_path": os.path.join(
-            data_path,
-            "files",
-            file_id
-        ),
-
-        "temp_fasta_path": os.path.join(
-            temp_subtraction_path,
-            "subtraction.fa"
-        ),
-
-        "temp_index_path": os.path.join(
-            temp_subtraction_path,
-            "reference"
-        )
-    })
-
-    return "check_db completed"
-
-
 @step
 async def make_subtraction_dir(job_params, run_in_executor):
     """
