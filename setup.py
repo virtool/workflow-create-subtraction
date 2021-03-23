@@ -1,7 +1,7 @@
 from pathlib import Path
 from setuptools import setup, find_packages
 
-AUTHORS = ["Tiansheng Sui"]
+AUTHORS = ["Tiansheng Sui", "Ian Boyes"]
 
 CLASSIFIERS = [
     "Topic :: Software Development :: Libraries",
@@ -12,7 +12,7 @@ PACKAGES = find_packages(exclude="tests")
 
 
 INSTALL_REQUIRES = [
-    "virtool-workflow==0.3.0"
+    "virtool-workflow==0.4.0"
 ]
 
 setup(

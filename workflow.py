@@ -1,128 +1,79 @@
-import os
-import shutil
-
-from virtool_core.utils import compress_file, rm
-from virtool_workflow import step, cleanup
+from virtool_core.utils import compress_file
+from virtool_workflow import cleanup, step
 
 import utils
+from utils import copy_or_decompress
 
 
 @step
-async def make_subtraction_dir(job_params, run_in_executor):
-    """
-    Make a directory for the host index files at ``<temp_path>/<subtraction_id>``.
-
-    """
-    await run_in_executor(
-        os.makedirs,
-        job_params["temp_subtraction_path"],
-        exist_ok=True
-    )
-
-    return "make_subtraction_dir step completed"
-
-
-@step
-async def unpack(job_params, number_of_processes, run_in_executor):
+async def unpack(create_subtraction, number_of_processes, run_in_executor, work_path):
     """
     Unpack the FASTA file if it is gzipped.
 
     """
     await run_in_executor(
-        utils.copy_or_decompress,
-        job_params["file_path"],
-        job_params["temp_fasta_path"],
+        copy_or_decompress,
+        create_subtraction.fasta_path,
+        work_path / "subtraction.fa",
         number_of_processes
     )
-    return "unpack step completed"
 
 
 @step
-async def set_stats(job_params, db):
+async def bowtie_build(number_of_processes, run_subprocess, fasta_path, index_path, work_path):
     """
-    Generate some stats for the FASTA file associated with this job. These numbers include nucleotide distribution,
-    length distribution, and sequence count.
-
-    """
-    gc, count = await utils.calculate_fasta_gc(job_params["temp_fasta_path"])
-    await db.subtraction.update_one({"_id": job_params["subtraction_id"]}, {
-        "$set": {
-            "gc": gc,
-            "count": count
-        }
-    })
-
-    return "set_stats step completed"
-
-
-@step
-async def bowtie_build(db, job_params, number_of_processes, run_subprocess):
-    """
-    Call *bowtie2-build* to build a Bowtie2 index for the host.
+    Call `bowtie2-build` to build a Bowtie2 index for the subtraction.
 
     """
     command = [
         "bowtie2-build",
         "-f",
         "--threads", str(number_of_processes),
-        job_params["temp_fasta_path"],
-        job_params["temp_index_path"]
+        fasta_path,
+        index_path
     ]
 
     await run_subprocess(command)
 
-    await db.subtraction.update_one({"_id": job_params["subtraction_id"]}, {
-        "$set": {
-            "ready": True
-        }
-    })
-
-    return "bowtie_build step completed"
-
 
 @step
-async def compress(job_params, number_of_processes, run_in_executor):
+async def compress(fasta_path, number_of_processes, run_in_executor):
     """
     Compress the subtraction FASTA file for long-term storage and download.
 
     """
     await run_in_executor(
         compress_file,
-        job_params["temp_fasta_path"],
-        job_params["temp_fasta_path"] + ".gz",
+        fasta_path,
+        f"{fasta_path}.gz",
         number_of_processes
     )
 
-    await run_in_executor(
-        rm,
-        job_params["temp_fasta_path"]
-    )
 
-    await run_in_executor(
-        shutil.copytree,
-        job_params["temp_subtraction_path"],
-        job_params["subtraction_path"]
-    )
+@step
+async def finish(create_subtraction, fasta_path, index_path):
+    """
+    Calculate and set the GC-content and chromosome count for the subtraction.
 
-    return "compress step completed"
+    TODO: Ensure finalize signature matches virtool-workflow.
+
+    """
+    await create_subtraction.upload_fasta(fasta_path)
+    await create_subtraction.upload_bowtie2(index_path)
+
+    gc, count = await utils.calculate_fasta_gc(fasta_path)
+
+    await create_subtraction.finalize(
+        count,
+        gc,
+    )
 
 
 @cleanup
-async def delete_subtraction(db, job_params, run_in_executor):
+async def delete_subtraction(create_subtraction, run_in_executor):
     """
-    Clean up if the job process encounters an error or is cancelled. Removes the host document from the database
-    and deletes any index files.
+    Clean up if the job process encounters an error or is cancelled. Removes the host document from
+    the database and deletes any index files.
 
     """
-    try:
-        await run_in_executor(
-            rm,
-            job_params["subtraction_path"],
-            True
-        )
-    except FileNotFoundError:
-        pass
-
-    await db.subtraction.delete_one({"_id": job_params["subtraction_id"]})
-
-    return "delete_subtraction step completed"
+    await create_subtraction.delete()
