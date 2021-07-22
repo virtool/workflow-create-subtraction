@@ -120,4 +120,4 @@ async def finalize(
     for path in intermediate.bowtie_path.glob("*.bt2"):
         await subtraction_provider.upload(path)
 
-    await subtraction_provider.finalize(intermediate.gc)
+    await subtraction_provider.finalize(intermediate.gc, intermediate.count)
