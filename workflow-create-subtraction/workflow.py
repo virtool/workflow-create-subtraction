@@ -2,7 +2,6 @@ from types import SimpleNamespace
 import aiofiles
 from pathlib import Path
 from virtool_workflow import step, fixture, hooks
-from virtool_core.data_model import Subtraction
 from virtool_core.utils import compress_file
 from virtool_workflow.execution.run_subprocess import RunSubprocess
 from virtool_workflow.api.subtractions import SubtractionProvider
