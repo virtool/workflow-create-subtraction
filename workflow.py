@@ -1,5 +1,6 @@
 from pathlib import Path
 from types import SimpleNamespace
+
 import aiofiles
 from virtool_core.utils import compress_file
 from fixtures import fixture
@@ -12,6 +13,7 @@ from virtool_workflow.execution.run_subprocess import RunSubprocess
 @fixture
 def subtraction_provider(subtraction_providers):
     return subtraction_providers[0]
+
 
 @hooks.on_failure
 async def delete_subtraction(subtraction_provider: SubtractionProvider):
@@ -28,7 +30,7 @@ def intermediate():
 @fixture
 def fasta_path(input_files: dict) -> Path:
     """The path to the fasta file for the subtraction."""
-    return input_files["subtraction.fa"]
+    return list(input_files.values())[0]
 
 
 @step
