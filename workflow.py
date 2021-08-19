@@ -8,7 +8,6 @@ from virtool_workflow.api.subtractions import SubtractionProvider
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
 
-__package__ = "workflow_create_subtraction"
 
 
 @hooks.on_failure
