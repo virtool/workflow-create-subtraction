@@ -104,14 +104,13 @@ async def compress_fasta(
     proc: int,
 ):
     """Compress the fasta file before uploading."""
-    intermediate.compressed_path = fasta_path.with_suffix(".fq.gz")
+    intermediate.compressed_path = fasta_path.parent/"subtraction.fa.gz"
 
     await run_in_executor(
-        compress_file(
-            fasta_path,
-            intermediate.compressed_path,
-            proc,
-        )
+        compress_file,
+        fasta_path,
+        intermediate.compressed_path,
+        proc,
     )
 
 
