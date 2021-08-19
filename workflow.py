@@ -9,6 +9,9 @@ from virtool_workflow.execution.run_in_executor import FunctionExecutor
 from virtool_workflow.execution.run_subprocess import RunSubprocess
 
 
+@fixture
+def subtraction_provider(subtraction_providers):
+    return subtraction_providers[0]
 
 @hooks.on_failure
 async def delete_subtraction(subtraction_provider: SubtractionProvider):
