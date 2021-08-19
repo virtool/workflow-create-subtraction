@@ -1,11 +1,12 @@
+from pathlib import Path
 from types import SimpleNamespace
 import aiofiles
-from pathlib import Path
-from virtool_workflow import step, fixture, hooks
 from virtool_core.utils import compress_file
-from virtool_workflow.execution.run_subprocess import RunSubprocess
+from fixtures import fixture
+from virtool_workflow import hooks, step
 from virtool_workflow.api.subtractions import SubtractionProvider
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
+from virtool_workflow.execution.run_subprocess import RunSubprocess
 
 __package__ = "workflow_create_subtraction"
 
