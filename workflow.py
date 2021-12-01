@@ -1,9 +1,11 @@
+import shutil
 from pathlib import Path
 from types import SimpleNamespace
 
 import aiofiles
-from virtool_core.utils import compress_file
 from fixtures import fixture
+from virtool_core.utils import compress_file
+from virtool_core.utils import is_gzipped, decompress_file
 from virtool_workflow import hooks, step
 from virtool_workflow.api.subtractions import SubtractionProvider
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
@@ -28,9 +30,38 @@ def intermediate():
 
 
 @fixture
-def fasta_path(input_files: dict) -> Path:
-    """The path to the fasta file for the subtraction."""
+def input_path(input_files: dict) -> Path:
+    """The path to the input FASTA file for the subtraction."""
     return list(input_files.values())[0]
+
+
+@fixture
+def fasta_path(work_path: Path) -> Path:
+    """The path to the decompressed FASTA file."""
+    return work_path / "subtraction.fa"
+
+
+@step
+async def decompress(
+    fasta_path: Path,
+    input_path: Path,
+    run_in_executor: FunctionExecutor,
+):
+    """
+    Decompress the input file to `fasta_path` if it is gzipped or copy it if it is uncompressed.
+    """
+    if is_gzipped(input_path):
+        await run_in_executor(
+            decompress_file,
+            input_path,
+            fasta_path,
+        )
+    else:
+        await run_in_executor(
+            shutil.copyfile,
+            input_path,
+            fasta_path
+        )
 
 
 @step
@@ -49,7 +80,7 @@ async def compute_fasta_gc_and_count(
 
     count = 0
 
-    # Go through the fasta file getting the nucleotide counts, lengths, and number of sequences
+    # Go through the FASTA file getting the nucleotide counts, lengths, and number of sequences
     async with aiofiles.open(fasta_path, "r") as f:
         async for line in f:
             if line[0] == ">":
@@ -65,8 +96,6 @@ async def compute_fasta_gc_and_count(
     intermediate.count = count
     intermediate.gc = {
         k: round(nucleotides[k] / nucleotides_sum, 3) for k in nucleotides}
-
-    return "Fasta GC computed."
 
 
 @step
@@ -92,8 +121,6 @@ async def bowtie2_build(
     await run_subprocess(command)
 
     intermediate.bowtie_path = bowtie_path
-
-    return "Finished bowtie2 build."
 
 
 @step
