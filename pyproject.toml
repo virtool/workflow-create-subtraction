@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "workflow-create-subtraction"
-version = "0.1.0"
+version = "0.0.0"
 description = ""
 authors = ["Ian Boyes <igboyes@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-virtool-workflow = "^1.0.0"
+virtool-workflow = "^1.0.4"
 
 [tool.poetry.dev-dependencies]
 
