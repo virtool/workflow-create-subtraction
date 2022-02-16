@@ -125,9 +125,10 @@ async def build_index(
 
 @step
 async def finalize(
-    subtraction_provider: SubtractionProvider,
+    fasta_path: Path,
     intermediate: SimpleNamespace,
     run_in_executor: FunctionExecutor,
+    subtraction_provider: SubtractionProvider,
     proc: int,
 ):
     """Compress and subtraction data."""
