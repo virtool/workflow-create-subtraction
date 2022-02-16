@@ -131,14 +131,16 @@ async def finalize(
     proc: int,
 ):
     """Compress and subtraction data."""
+    compressed_path = fasta_path.parent / "subtraction.fa.gz"
+
     await run_in_executor(
         compress_file,
         fasta_path,
-        intermediate.compressed_path,
+        compressed_path,
         proc,
     )
 
-    await subtraction_provider.upload(intermediate.compressed_path)
+    await subtraction_provider.upload(compressed_path)
 
     for path in intermediate.bowtie_path.glob("*.bt2"):
         await subtraction_provider.upload(path)
