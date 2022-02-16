@@ -48,7 +48,8 @@ async def decompress(
     run_in_executor: FunctionExecutor,
 ):
     """
-    Decompress the input file to `fasta_path` if it is gzipped or copy it if it is uncompressed.
+    Ensure the input FASTA data is decompressed.
+
     """
     if is_gzipped(input_path):
         await run_in_executor(
@@ -65,11 +66,11 @@ async def decompress(
 
 
 @step
-async def compute_fasta_gc_and_count(
+async def compute_gc_and_count(
     fasta_path: Path,
     intermediate: SimpleNamespace,
 ):
-    """Compute the GC and count for the subtraction fasta file."""
+    """Compute the GC and count."""
     nucleotides = {
         "a": 0,
         "t": 0,
@@ -80,7 +81,6 @@ async def compute_fasta_gc_and_count(
 
     count = 0
 
-    # Go through the FASTA file getting the nucleotide counts, lengths, and number of sequences
     async with aiofiles.open(fasta_path, "r") as f:
         async for line in f:
             if line[0] == ">":
@@ -99,14 +99,14 @@ async def compute_fasta_gc_and_count(
 
 
 @step
-async def bowtie2_build(
+async def build_index(
     proc: int,
     fasta_path: Path,
     intermediate: SimpleNamespace,
     work_path: Path,
     run_subprocess: RunSubprocess,
 ):
-    """Build the bowtie2 index of the fasta file."""
+    """Build a Bowtie2 index."""
     bowtie_path = work_path / "index-build"
     bowtie_path.mkdir()
 
@@ -124,15 +124,13 @@ async def bowtie2_build(
 
 
 @step
-async def compress_fasta(
-    fasta_path: Path,
+async def finalize(
+    subtraction_provider: SubtractionProvider,
     intermediate: SimpleNamespace,
     run_in_executor: FunctionExecutor,
     proc: int,
 ):
-    """Compress the fasta file before uploading."""
-    intermediate.compressed_path = fasta_path.parent/"subtraction.fa.gz"
-
+    """Compress and subtraction data."""
     await run_in_executor(
         compress_file,
         fasta_path,
@@ -140,14 +138,8 @@ async def compress_fasta(
         proc,
     )
 
-
-@step
-async def finalize(
-    subtraction_provider: SubtractionProvider,
-    intermediate: SimpleNamespace,
-):
-    """Upload files and fasta GC using the Virtool Jobs API."""
     await subtraction_provider.upload(intermediate.compressed_path)
+
     for path in intermediate.bowtie_path.glob("*.bt2"):
         await subtraction_provider.upload(path)
 
