@@ -6,7 +6,7 @@ authors = ["Ian Boyes <igboyes@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-virtool-workflow = "^2.0.0"
+virtool-workflow = "^4.0.0"
 
 [tool.poetry.dev-dependencies]
 
