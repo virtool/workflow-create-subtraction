@@ -2,10 +2,8 @@ import shutil
 from pathlib import Path
 from types import SimpleNamespace
 
-import aiofiles
 from fixtures import fixture
-from virtool_core.utils import compress_file
-from virtool_core.utils import is_gzipped, decompress_file
+from virtool_core.utils import compress_file, decompress_file, is_gzipped
 from virtool_workflow import hooks, step
 from virtool_workflow.api.subtractions import SubtractionProvider
 from virtool_workflow.execution.run_in_executor import FunctionExecutor
@@ -58,44 +56,40 @@ async def decompress(
             fasta_path,
         )
     else:
-        await run_in_executor(
-            shutil.copyfile,
-            input_path,
-            fasta_path
-        )
+        await run_in_executor(shutil.copyfile, input_path, fasta_path)
 
 
 @step
 async def compute_gc_and_count(
-    fasta_path: Path,
-    intermediate: SimpleNamespace,
+    fasta_path: Path, intermediate: SimpleNamespace, run_subprocess
 ):
     """Compute the GC and count."""
+    output = []
+
+    async def stdout_handler(line):
+        output.append(line.decode("UTF-8").rstrip())
+
+    await run_subprocess(
+        ["./count_nucleotides_and_seqs", str(fasta_path)], stdout_handler=stdout_handler
+    )
+
+    a, t, g, c, n, count = ("".join(output)).split(",")
+
     nucleotides = {
-        "a": 0,
-        "t": 0,
-        "g": 0,
-        "c": 0,
-        "n": 0
+        "a": int(a),
+        "t": int(t),
+        "g": int(g),
+        "c": int(c),
+        "n": int(n),
     }
 
-    count = 0
-
-    async with aiofiles.open(fasta_path, "r") as f:
-        async for line in f:
-            if line[0] == ">":
-                count += 1
-                continue
-
-            for i in ["a", "t", "g", "c", "n"]:
-                # Find lowercase and uppercase nucleotide characters
-                nucleotides[i] += line.lower().count(i)
+    intermediate.count = int(count)
 
     nucleotides_sum = sum(nucleotides.values())
 
-    intermediate.count = count
     intermediate.gc = {
-        k: round(nucleotides[k] / nucleotides_sum, 3) for k in nucleotides}
+        key: round(nucleotides[key] / nucleotides_sum, 3) for key in nucleotides
+    }
 
 
 @step
@@ -113,7 +107,8 @@ async def build_index(
     command = [
         "bowtie2-build",
         "-f",
-        "--threads", str(proc),
+        "--threads",
+        str(proc),
         str(fasta_path),
         str(bowtie_path) + "/subtraction",
     ]
