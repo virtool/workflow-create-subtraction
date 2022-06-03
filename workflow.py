@@ -2,7 +2,7 @@ import shutil
 from pathlib import Path
 from types import SimpleNamespace
 
-from fixtures import fixture
+from pyfixtures import fixture
 from virtool_core.utils import compress_file, decompress_file, is_gzipped
 from virtool_workflow import hooks, step
 from virtool_workflow.api.subtractions import SubtractionProvider
@@ -59,7 +59,7 @@ async def decompress(
         await run_in_executor(shutil.copyfile, input_path, fasta_path)
 
 
-@step
+@step(name="Compute GC and count")
 async def compute_gc_and_count(
     fasta_path: Path, intermediate: SimpleNamespace, run_subprocess
 ):

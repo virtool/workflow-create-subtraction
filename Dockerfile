@@ -4,7 +4,7 @@ COPY /utils/count_nucleotides_and_seqs/ /build/
 RUN ls
 RUN cargo build -r
 
-FROM virtool/workflow:4.0.2 as test
+FROM virtool/workflow:4.2.1 as test
 WORKDIR /test
 COPY poetry.lock pyproject.toml /test/
 RUN pip install poetry
@@ -15,7 +15,7 @@ COPY workflow.py /test/
 RUN poetry run pytest
 
 
-FROM virtool/workflow:4.0.2
+FROM virtool/workflow:4.2.1
 WORKDIR /workflow
 COPY --from=rust /build/target/release/count_nucleotides_and_seqs /workflow/
 COPY workflow.py /workflow/workflow.py
