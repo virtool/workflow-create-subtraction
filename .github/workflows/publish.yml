@@ -4,9 +4,12 @@ on:
   release:
     types: [published]
 
+env:
+  REGISTRY: ghcr.io
+
 jobs:
   dockerhub:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -20,9 +23,8 @@ jobs:
         with:
           push: true
           tags: virtool/create-subtraction:${{ github.event.release.tag_name }}
-
   ghcr:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       packages: write
@@ -30,8 +32,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Write VERSION file
-        run: echo ${{ github.event.release.tag_name }} > VERSION
       - name: Update pyproject.toml version
         run: sed -i 's/0\.0\.0/${{ github.event.release.tag_name }}/' pyproject.toml
       - name: Login to Registry
