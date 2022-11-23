@@ -20,6 +20,12 @@ jobs:
         with:
           fetch-depth: 0
       - uses: wagoid/commitlint-github-action@v4
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Docker Build
+        run: docker build .
   test:
     runs-on: ubuntu-20.04
     steps:
