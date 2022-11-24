@@ -2,7 +2,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-from virtool_workflow.execution.run_subprocess import run_subprocess
+from virtool_workflow.runtime.run_subprocess import run_subprocess
 
 from workflow import compute_gc_and_count, decompress
 
@@ -14,10 +14,7 @@ async def test_decompress_and_compute_gc(datafiles, tmpdir):
     input_path = Path(datafiles) / "arabidopsis_thaliana.fa.gz"
     fasta_path = Path(tmpdir) / "decompress.fa"
 
-    async def run_in_executor(func, *args):
-        return func(*args)
-
-    await decompress(fasta_path, input_path, run_in_executor)
+    await decompress(fasta_path, input_path)
 
     assert fasta_path.is_file()
 
