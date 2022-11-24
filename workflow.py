@@ -1,18 +1,12 @@
+import asyncio
 import shutil
 from pathlib import Path
 from types import SimpleNamespace
 
-from pyfixtures import fixture
 from virtool_core.utils import compress_file, decompress_file, is_gzipped
 from virtool_workflow import hooks, step
 from virtool_workflow.api.subtractions import SubtractionProvider
-from virtool_workflow.execution.run_in_executor import FunctionExecutor
-from virtool_workflow.execution.run_subprocess import RunSubprocess
-
-
-@fixture
-def subtraction_provider(subtraction_providers):
-    return subtraction_providers[0]
+from virtool_workflow.runtime.run_subprocess import RunSubprocess
 
 
 @hooks.on_failure
@@ -21,42 +15,23 @@ async def delete_subtraction(subtraction_provider: SubtractionProvider):
     await subtraction_provider.delete()
 
 
-@fixture
-def intermediate():
-    """A namespace for intermediate variables."""
-    return SimpleNamespace()
-
-
-@fixture
-def input_path(input_files: dict) -> Path:
-    """The path to the input FASTA file for the subtraction."""
-    return list(input_files.values())[0]
-
-
-@fixture
-def fasta_path(work_path: Path) -> Path:
-    """The path to the decompressed FASTA file."""
-    return work_path / "subtraction.fa"
-
-
 @step
 async def decompress(
     fasta_path: Path,
     input_path: Path,
-    run_in_executor: FunctionExecutor,
 ):
     """
     Ensure the input FASTA data is decompressed.
 
     """
     if is_gzipped(input_path):
-        await run_in_executor(
+        await asyncio.to_thread(
             decompress_file,
             input_path,
             fasta_path,
         )
     else:
-        await run_in_executor(shutil.copyfile, input_path, fasta_path)
+        await asyncio.to_thread(shutil.copyfile, input_path, fasta_path)
 
 
 @step(name="Compute GC and count")
@@ -122,14 +97,13 @@ async def build_index(
 async def finalize(
     fasta_path: Path,
     intermediate: SimpleNamespace,
-    run_in_executor: FunctionExecutor,
     subtraction_provider: SubtractionProvider,
     proc: int,
 ):
     """Compress and subtraction data."""
     compressed_path = fasta_path.parent / "subtraction.fa.gz"
 
-    await run_in_executor(
+    await asyncio.to_thread(
         compress_file,
         fasta_path,
         compressed_path,
