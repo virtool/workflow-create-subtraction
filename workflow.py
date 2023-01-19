@@ -38,14 +38,9 @@ async def decompress(
 
 @step(name="Compute GC and count")
 async def compute_gc_and_count(
-    fasta_path: Path, intermediate: SimpleNamespace, run_subprocess
+    fasta_path: Path, intermediate: SimpleNamespace
 ):
     """Compute the GC and count."""
-    output = []
-
-    async def stdout_handler(line):
-        output.append(line.decode("UTF-8").rstrip())
-
     a, t, g, c, n, count = count_nucleotides_and_seqs.run(str(fasta_path))
 
     nucleotides = {
