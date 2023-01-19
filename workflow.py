@@ -3,6 +3,8 @@ import shutil
 from pathlib import Path
 from types import SimpleNamespace
 
+import count_nucleotides_and_seqs
+
 from virtool_core.utils import compress_file, decompress_file, is_gzipped
 from virtool_workflow import hooks, step
 from virtool_workflow.api.subtractions import SubtractionProvider
@@ -44,11 +46,7 @@ async def compute_gc_and_count(
     async def stdout_handler(line):
         output.append(line.decode("UTF-8").rstrip())
 
-    await run_subprocess(
-        ["./count_nucleotides_and_seqs", str(fasta_path)], stdout_handler=stdout_handler
-    )
-
-    a, t, g, c, n, count = ("".join(output)).split(",")
+    a, t, g, c, n, count = count_nucleotides_and_seqs.run(str(fasta_path))
 
     nucleotides = {
         "a": int(a),
