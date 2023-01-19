@@ -6,12 +6,13 @@ use pyo3::prelude::*;
 #[pymodule]
 fn count_nucleotides_and_seqs(_py: Python, m: &PyModule) -> Result<(), PyErr>
 {
-    m.add_function(wrap_pyfunction!(main, m)?)?;
+    m.add_function(wrap_pyfunction!(run, m)?)?;
     return Ok(());
 }
 
 #[pyfunction]
-fn main(filename: String) {
+fn run(filename: String) -> (u64, u64, u64, u64, u64, u32)
+{
 
     let mut a: u64 = 0;
     let mut t: u64 = 0;
@@ -43,7 +44,7 @@ fn main(filename: String) {
         }
     }
 
-    println!("{},{},{},{},{},{}", a, t, g, c, n, count);
+    return (a, t, g, c, n, count);
 }
 
 fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
