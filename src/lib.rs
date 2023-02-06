@@ -1,12 +1,18 @@
-use std::env;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
+use pyo3::prelude::*;
 
-fn main() {
-    let args: Vec<String> = env::args().collect();
+#[pymodule]
+fn count_nucleotides_and_seqs(_py: Python, m: &PyModule) -> Result<(), PyErr>
+{
+    m.add_function(wrap_pyfunction!(run, m)?)?;
+    return Ok(());
+}
 
-    let filename = &args[1];
+#[pyfunction]
+fn run(filename: String) -> (u64, u64, u64, u64, u64, u32)
+{
 
     let mut a: u64 = 0;
     let mut t: u64 = 0;
@@ -38,7 +44,7 @@ fn main() {
         }
     }
 
-    println!("{},{},{},{},{},{}", a, t, g, c, n, count);
+    return (a, t, g, c, n, count);
 }
 
 fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>

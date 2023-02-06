@@ -2,12 +2,10 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-from virtool_workflow.runtime.run_subprocess import run_subprocess
 
 from workflow import compute_gc_and_count, decompress
 
 ARABIDOPSIS_PATH = Path(__file__).parent / "files/arabidopsis_thaliana.fa.gz"
-
 
 @pytest.mark.datafiles(ARABIDOPSIS_PATH)
 async def test_decompress_and_compute_gc(datafiles, tmpdir):
@@ -20,7 +18,7 @@ async def test_decompress_and_compute_gc(datafiles, tmpdir):
 
     intermediate = SimpleNamespace()
 
-    await compute_gc_and_count(fasta_path, intermediate, run_subprocess())
+    await compute_gc_and_count(fasta_path, intermediate)
 
     print(intermediate.gc)
 
