@@ -7,6 +7,7 @@ from workflow import compute_gc_and_count, decompress
 
 ARABIDOPSIS_PATH = Path(__file__).parent / "files/arabidopsis_thaliana.fa.gz"
 
+
 @pytest.mark.datafiles(ARABIDOPSIS_PATH)
 async def test_decompress_and_compute_gc(datafiles, tmpdir):
     input_path = Path(datafiles) / "arabidopsis_thaliana.fa.gz"
