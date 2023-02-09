@@ -8,16 +8,7 @@ COPY src src
 COPY Cargo.toml Cargo.lock ./
 RUN maturin build --release
 
-FROM virtool/workflow:5.1.0 as build
-WORKDIR /workflow
-COPY fixtures.py workflow.py /workflow/
-COPY --from=rustPyo3 /build/target/wheels/count_nucleotides_and_seqs*.whl ./
-RUN ls
-RUN pip3.10 install count_nucleotides_and_seqs*.whl
-RUN poetry install
-RUN poetry add ./count_nucleotides_and_seqs*.whl
-
-FROM virtool/workflow:5.1.0 as test
+FROM virtool/workflow:5.3.0 as test
 WORKDIR /test
 COPY poetry.lock pyproject.toml /test/
 RUN curl -sSL https://install.python-poetry.org | python -
@@ -30,3 +21,12 @@ RUN pip3.10 install count_nucleotides_and_seqs*.whl
 RUN poetry install
 RUN poetry add ./count_nucleotides_and_seqs*.whl
 RUN poetry run pytest
+
+FROM virtool/workflow:5.3.0 as build
+WORKDIR /workflow
+COPY fixtures.py workflow.py /workflow/
+COPY --from=rustPyo3 /build/target/wheels/count_nucleotides_and_seqs*.whl ./
+RUN ls
+RUN pip3.10 install count_nucleotides_and_seqs*.whl
+RUN poetry install
+RUN poetry add ./count_nucleotides_and_seqs*.whl
