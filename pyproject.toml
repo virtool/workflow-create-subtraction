@@ -7,7 +7,7 @@ authors = ["Ian Boyes <igboyes@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.10"
 pyfixtures = "^1.1.0"
-virtool-workflow = "5.1.0"
+virtool-workflow = "^5.0.0"
 pre-commit = "^3.0.4"
 black = "^23.1.0"
 
