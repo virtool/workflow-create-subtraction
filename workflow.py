@@ -4,7 +4,6 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import count_nucleotides_and_seqs
-
 from virtool_core.utils import compress_file, decompress_file, is_gzipped
 from virtool_workflow import hooks, step
 from virtool_workflow.api.subtractions import SubtractionProvider
@@ -60,11 +59,11 @@ async def compute_gc_and_count(fasta_path: Path, intermediate: SimpleNamespace):
 
 @step
 async def build_index(
-    proc: int,
     fasta_path: Path,
     intermediate: SimpleNamespace,
-    work_path: Path,
+    proc: int,
     run_subprocess: RunSubprocess,
+    work_path: Path,
 ):
     """Build a Bowtie2 index."""
     bowtie_path = work_path / "index-build"
@@ -88,8 +87,8 @@ async def build_index(
 async def finalize(
     fasta_path: Path,
     intermediate: SimpleNamespace,
-    subtraction_provider: SubtractionProvider,
     proc: int,
+    subtraction_provider: SubtractionProvider,
 ):
     """Compress and subtraction data."""
     compressed_path = fasta_path.parent / "subtraction.fa.gz"

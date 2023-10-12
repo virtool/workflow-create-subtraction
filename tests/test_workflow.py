@@ -2,6 +2,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from virtool_workflow.runtime.run_subprocess import run_subprocess
 
 from workflow import compute_gc_and_count, decompress
 
@@ -20,8 +21,6 @@ async def test_decompress_and_compute_gc(datafiles, tmpdir):
     intermediate = SimpleNamespace()
 
     await compute_gc_and_count(fasta_path, intermediate)
-
-    print(intermediate.gc)
 
     assert intermediate.gc == {"a": 0.319, "t": 0.319, "g": 0.18, "c": 0.18, "n": 0.002}
     assert intermediate.count == 7
