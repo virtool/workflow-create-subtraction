@@ -21,7 +21,5 @@ async def test_decompress_and_compute_gc(datafiles, tmpdir):
 
     await compute_gc_and_count(fasta_path, intermediate)
 
-    print(intermediate.gc)
-
     assert intermediate.gc == {"a": 0.319, "t": 0.319, "g": 0.18, "c": 0.18, "n": 0.002}
     assert intermediate.count == 7
