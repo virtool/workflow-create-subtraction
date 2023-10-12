@@ -2,7 +2,6 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-from virtool_workflow.runtime.run_subprocess import run_subprocess
 
 from workflow import compute_gc_and_count, decompress
 
