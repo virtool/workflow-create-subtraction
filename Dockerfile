@@ -27,7 +27,7 @@ ENV PATH="/root/.local/bin:${PATH}"
 COPY --from=prep /build/bowtie2/* /usr/local/bin/
 COPY --from=prep /build/pigz-2.8/pigz /usr/local/bin/pigz
 COPY --from=rust /build/target/wheels/count_nucleotides_and_seqs*.whl ./
-COPY fixtures.py workflow.py pyproject.toml poetry.lock ./
+COPY workflow.py pyproject.toml poetry.lock ./
 RUN poetry export > requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
