@@ -4,41 +4,66 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import count_nucleotides_and_seqs
+from pyfixtures import fixture
 from virtool_core.utils import compress_file, decompress_file, is_gzipped
 from virtool_workflow import hooks, step
-from virtool_workflow.api.subtractions import SubtractionProvider
+from virtool_workflow.data.subtractions import WFNewSubtraction
 from virtool_workflow.runtime.run_subprocess import RunSubprocess
 
 
 @hooks.on_failure
-async def delete_subtraction(subtraction_provider: SubtractionProvider):
+async def delete_subtraction(new_subtraction: WFNewSubtraction):
     """Delete the subtraction in the case of a failure."""
-    await subtraction_provider.delete()
+    await new_subtraction.delete()
 
 
-@step
+@fixture
+async def bowtie_index_path(work_path: Path) -> Path:
+    """The output directory for the subtraction's Bowtie2 index."""
+    path = work_path / "bowtie"
+    await asyncio.to_thread(path.mkdir)
+
+    return path
+
+
+@fixture
+async def decompressed_fasta_path(work_path: Path) -> Path:
+    """The path to the input FASTA file for the subtraction."""
+    return work_path / "subtraction.fa"
+
+
+@fixture
+def intermediate() -> SimpleNamespace:
+    """A namespace for intermediate variables."""
+    return SimpleNamespace()
+
+
+@step(name="Decompress FASTA")
 async def decompress(
-    fasta_path: Path,
-    input_path: Path,
+    decompressed_fasta_path: Path,
+    new_subtraction: WFNewSubtraction,
+    proc: int,
 ):
-    """
-    Ensure the input FASTA data is decompressed.
-
-    """
-    if is_gzipped(input_path):
+    """Ensure the input FASTA data is decompressed."""
+    if await asyncio.to_thread(is_gzipped, new_subtraction.fasta_path):
         await asyncio.to_thread(
             decompress_file,
-            input_path,
-            fasta_path,
+            new_subtraction.fasta_path,
+            decompressed_fasta_path,
+            processes=proc,
         )
     else:
-        await asyncio.to_thread(shutil.copyfile, input_path, fasta_path)
+        await asyncio.to_thread(
+            shutil.copyfile, new_subtraction.fasta_path, decompressed_fasta_path
+        )
 
 
-@step(name="Compute GC and count")
-async def compute_gc_and_count(fasta_path: Path, intermediate: SimpleNamespace):
+@step(name="Compute GC and Count")
+async def compute_gc_and_count(
+    decompressed_fasta_path: Path, intermediate: SimpleNamespace
+):
     """Compute the GC and count."""
-    a, t, g, c, n, count = count_nucleotides_and_seqs.run(str(fasta_path))
+    a, t, g, c, n, count = count_nucleotides_and_seqs.run(str(decompressed_fasta_path))
 
     nucleotides = {
         "a": int(a),
@@ -59,50 +84,46 @@ async def compute_gc_and_count(fasta_path: Path, intermediate: SimpleNamespace):
 
 @step
 async def build_index(
-    fasta_path: Path,
-    intermediate: SimpleNamespace,
+    bowtie_index_path: Path,
+    decompressed_fasta_path: Path,
     proc: int,
     run_subprocess: RunSubprocess,
-    work_path: Path,
 ):
     """Build a Bowtie2 index."""
-    bowtie_path = work_path / "index-build"
-    bowtie_path.mkdir()
-
-    command = [
-        "bowtie2-build",
-        "-f",
-        "--threads",
-        str(proc),
-        str(fasta_path),
-        str(bowtie_path) + "/subtraction",
-    ]
-
-    await run_subprocess(command)
-
-    intermediate.bowtie_path = bowtie_path
+    await run_subprocess(
+        [
+            "bowtie2-build",
+            "-f",
+            "--threads",
+            str(proc),
+            decompressed_fasta_path,
+            str(bowtie_index_path) + "/subtraction",
+        ]
+    )
 
 
 @step
 async def finalize(
-    fasta_path: Path,
+    bowtie_index_path: Path,
+    decompressed_fasta_path: Path,
     intermediate: SimpleNamespace,
+    new_subtraction: WFNewSubtraction,
     proc: int,
-    subtraction_provider: SubtractionProvider,
+    work_path: Path,
 ):
     """Compress and subtraction data."""
-    compressed_path = fasta_path.parent / "subtraction.fa.gz"
+    compressed_path = work_path / "subtraction.fa.gz"
 
     await asyncio.to_thread(
         compress_file,
-        fasta_path,
+        decompressed_fasta_path,
         compressed_path,
-        proc,
+        processes=proc,
     )
 
-    await subtraction_provider.upload(compressed_path)
+    await new_subtraction.upload(compressed_path)
 
-    for path in intermediate.bowtie_path.glob("*.bt2"):
-        await subtraction_provider.upload(path)
+    for path in bowtie_index_path.glob("*.bt2"):
+        await new_subtraction.upload(path)
 
-    await subtraction_provider.finalize(intermediate.gc, intermediate.count)
+    await new_subtraction.finalize(intermediate.gc, intermediate.count)
