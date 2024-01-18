@@ -2,18 +2,22 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from virtool_workflow.data.subtractions import WFNewSubtraction
 
 from workflow import compute_gc_and_count, decompress
 
-ARABIDOPSIS_PATH = Path(__file__).parent / "files/arabidopsis_thaliana.fa.gz"
+ARABIDOPSIS_PATH = Path(__file__).parent / "files/subtraction.fa.gz"
+
+
 
 
 @pytest.mark.datafiles(ARABIDOPSIS_PATH)
-async def test_decompress_and_compute_gc(datafiles, tmpdir):
-    input_path = Path(datafiles) / "arabidopsis_thaliana.fa.gz"
+async def test_decompress_and_compute_gc(datafiles, tmpdir, mocker):
     fasta_path = Path(tmpdir) / "decompress.fa"
 
-    await decompress(fasta_path, input_path)
+    new_subtraction = WFNewSubtraction(id="foo", delete=mocker.Mock(), finalize=mocker.Mock(), name="bar", nickname="baz", path=Path(tmpdir), upload=mocker.Mock())
+
+    await decompress(fasta_path, new_subtraction, 1)
 
     assert fasta_path.is_file()
 

@@ -12,16 +12,18 @@ authors = [
 
 [tool.poetry.dependencies]
 python = "~3.10"
-virtool-workflow = {version = "^6.0.0a3", allow-prereleases = true}
+virtool-workflow = "6.0.0a7"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.2"
 pytest-aiohttp = "^1.0.5"
 pytest-asyncio = "^0.21.1"
 pytest-datafiles = "^2.0.1"
+pytest-mock = "^3.12.0"
 
 [tool.pytest.ini_options]
 markers = ["asyncio_mode: auto"]
+asyncio_mode = "auto"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
