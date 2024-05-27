@@ -9,13 +9,19 @@ from workflow import compute_gc_and_count, decompress
 ARABIDOPSIS_PATH = Path(__file__).parent / "files/subtraction.fa.gz"
 
 
-
-
 @pytest.mark.datafiles(ARABIDOPSIS_PATH)
-async def test_decompress_and_compute_gc(datafiles, tmpdir, mocker):
-    fasta_path = Path(tmpdir) / "decompress.fa"
+async def test_decompress_and_compute_gc(datafiles, mocker, tmp_path: Path):
+    fasta_path = tmp_path / "decompress.fa"
 
-    new_subtraction = WFNewSubtraction(id="foo", delete=mocker.Mock(), finalize=mocker.Mock(), name="bar", nickname="baz", path=Path(tmpdir), upload=mocker.Mock())
+    new_subtraction = WFNewSubtraction(
+        id="foo",
+        delete=mocker.Mock(),
+        finalize=mocker.Mock(),
+        name="bar",
+        nickname="baz",
+        path=tmp_path,
+        upload=mocker.Mock(),
+    )
 
     await decompress(fasta_path, new_subtraction, 1)
 

@@ -3,7 +3,6 @@ import shutil
 from pathlib import Path
 from types import SimpleNamespace
 
-import count_nucleotides_and_seqs
 from pyfixtures import fixture
 from virtool_core.utils import compress_file, decompress_file, is_gzipped
 from virtool_workflow import hooks, step
@@ -63,20 +62,28 @@ async def compute_gc_and_count(
     decompressed_fasta_path: Path, intermediate: SimpleNamespace
 ):
     """Compute the GC and count."""
-    a, t, g, c, n, count = count_nucleotides_and_seqs.run(str(decompressed_fasta_path))
 
-    nucleotides = {
-        "a": int(a),
-        "t": int(t),
-        "g": int(g),
-        "c": int(c),
-        "n": int(n),
-    }
+    def func(path: Path):
+        _count = 0
+        _nucleotides = {"a": 0, "t": 0, "g": 0, "c": 0, "n": 0}
 
-    intermediate.count = int(count)
+        with open(path, "r") as f:
+            for line in f:
+                if line[0] == ">":
+                    _count += 1
+
+                elif line:
+                    for i in ["a", "t", "g", "c", "n"]:
+                        # Find lowercase and uppercase nucleotide characters
+                        _nucleotides[i] += line.lower().count(i)
+
+        return _count, _nucleotides
+
+    count, nucleotides = await asyncio.to_thread(func, decompressed_fasta_path)
 
     nucleotides_sum = sum(nucleotides.values())
 
+    intermediate.count = count
     intermediate.gc = {
         key: round(nucleotides[key] / nucleotides_sum, 3) for key in nucleotides
     }
