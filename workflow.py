@@ -3,7 +3,6 @@ import shutil
 from pathlib import Path
 from types import SimpleNamespace
 
-from pyfixtures import fixture
 from virtool_core.utils import compress_file, decompress_file, is_gzipped
 from virtool_workflow import hooks, step
 from virtool_workflow.data.subtractions import WFNewSubtraction
@@ -14,27 +13,6 @@ from virtool_workflow.runtime.run_subprocess import RunSubprocess
 async def delete_subtraction(new_subtraction: WFNewSubtraction):
     """Delete the subtraction in the case of a failure."""
     await new_subtraction.delete()
-
-
-@fixture
-async def bowtie_index_path(work_path: Path) -> Path:
-    """The output directory for the subtraction's Bowtie2 index."""
-    path = work_path / "bowtie"
-    await asyncio.to_thread(path.mkdir)
-
-    return path
-
-
-@fixture
-async def decompressed_fasta_path(work_path: Path) -> Path:
-    """The path to the input FASTA file for the subtraction."""
-    return work_path / "subtraction.fa"
-
-
-@fixture
-def intermediate() -> SimpleNamespace:
-    """A namespace for intermediate variables."""
-    return SimpleNamespace()
 
 
 @step(name="Decompress FASTA")

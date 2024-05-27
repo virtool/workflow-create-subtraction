@@ -32,7 +32,7 @@ ENV VIRTUAL_ENV=/app/.venv \
 COPY --from=bowtie2 /build/bowtie2/* /usr/local/bin/
 COPY --from=pigz /build/pigz-2.8/pigz /usr/local/bin/pigz
 COPY --from=build /workflow/.venv /workflow/.venv
-COPY workflow.py VERSION* ./
+COPY fixtures.py workflow.py VERSION* ./
 
 FROM build as test
 WORKDIR /workflow
@@ -45,6 +45,6 @@ ENV PATH="/root/.local/bin:${PATH}" \
 COPY --from=build /workflow/.venv /workflow/.venv
 COPY pyproject.toml poetry.lock ./
 RUN poetry install
-COPY workflow.py ./
+COPY fixtures.py workflow.py ./
 COPY tests/ ./tests/
 RUN poetry run pytest
