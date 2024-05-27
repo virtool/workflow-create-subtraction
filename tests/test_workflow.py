@@ -11,7 +11,7 @@ ARABIDOPSIS_PATH = Path(__file__).parent / "files/subtraction.fa.gz"
 
 @pytest.mark.datafiles(ARABIDOPSIS_PATH)
 async def test_decompress_and_compute_gc(datafiles, mocker, tmp_path: Path):
-    fasta_path = tmp_path / "decompress.fa"
+    decompressed_fasta_path = tmp_path / "decompressed.fa"
 
     new_subtraction = WFNewSubtraction(
         id="foo",
@@ -23,13 +23,13 @@ async def test_decompress_and_compute_gc(datafiles, mocker, tmp_path: Path):
         upload=mocker.Mock(),
     )
 
-    await decompress(fasta_path, new_subtraction, 1)
+    await decompress(decompressed_fasta_path, new_subtraction, 1)
 
-    assert fasta_path.is_file()
+    assert decompressed_fasta_path.is_file()
 
     intermediate = SimpleNamespace()
 
-    await compute_gc_and_count(fasta_path, intermediate)
+    await compute_gc_and_count(decompressed_fasta_path, intermediate)
 
     assert intermediate.gc == {"a": 0.319, "t": 0.319, "g": 0.18, "c": 0.18, "n": 0.002}
     assert intermediate.count == 7
