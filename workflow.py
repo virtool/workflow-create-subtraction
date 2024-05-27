@@ -42,6 +42,9 @@ async def compute_gc_and_count(
     """Compute the GC and count."""
 
     def func(path: Path):
+        if not path.suffix != ".fa":
+            raise ValueError("Input file is not a FASTA file.")
+
         _count = 0
         _nucleotides = {"a": 0, "t": 0, "g": 0, "c": 0, "n": 0}
 
