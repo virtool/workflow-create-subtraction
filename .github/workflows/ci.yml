@@ -17,41 +17,45 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: wagoid/commitlint-github-action@v5
+      - name: Commitlint
+        uses: wagoid/commitlint-github-action@v6
   build:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Build
-        run: docker build .
+        run: docker build --target base .
   test:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-      - name: Build and Test
-        uses: docker/build-push-action@v4
+        uses: actions/checkout@v4
+      - name: Build
+        id: build-push
+        uses: docker/build-push-action@v5
         with:
           context: .
           load: true
           tags: ${{ env.TEST_TAG }}
           target: test
+      - name: Test
+        run: docker run ${{ env.TEST_TAG }}
   release:
     runs-on: ubuntu-22.04
     if: github.event_name == 'push'
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup NodeJS
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
       - name: Install semantic-release
-        run: npm i semantic-release@v18.0.0 conventional-changelog-conventionalcommits@4.6.1
+        run: npm i semantic-release@v23.0.0 conventional-changelog-conventionalcommits@8.0.0
       - name: Release
         env:
           GITHUB_USERNAME: ${{ secrets.GH_USERNAME }}
