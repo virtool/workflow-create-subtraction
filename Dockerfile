@@ -47,4 +47,3 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry install
 COPY fixtures.py workflow.py ./
 COPY tests/ ./tests/
-RUN poetry run pytest

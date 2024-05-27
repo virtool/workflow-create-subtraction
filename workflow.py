@@ -42,7 +42,7 @@ async def compute_gc_and_count(
     """Compute the GC and count."""
 
     def func(path: Path):
-        if not path.suffix != ".fa":
+        if not path.suffix != "fa":
             raise ValueError("Input file is not a FASTA file.")
 
         _count = 0
