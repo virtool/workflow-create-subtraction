@@ -3,7 +3,7 @@ import shutil
 from pathlib import Path
 from types import SimpleNamespace
 
-from virtool_core.utils import compress_file, decompress_file, is_gzipped
+from virtool.utils import decompress_file, is_gzipped, compress_file
 from virtool_workflow import hooks, step
 from virtool_workflow.data.subtractions import WFNewSubtraction
 from virtool_workflow.runtime.run_subprocess import RunSubprocess
