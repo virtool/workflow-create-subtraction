@@ -18,7 +18,7 @@ package-mode = false
 virtool-workflow = "7.2.1"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.4.0"
+pytest = "^8.4.1"
 pytest-asyncio = "^1.0.0"
 pytest-datafiles = "^3.0.0"
 pytest-mock = "^3.14.1"
