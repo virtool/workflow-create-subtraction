@@ -22,7 +22,7 @@ pytest = "^8.4.1"
 pytest-asyncio = "^1.1.0"
 pytest-datafiles = "^3.0.0"
 pytest-mock = "^3.14.1"
-ruff = "^0.12.5"
+ruff = "^0.12.6"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
