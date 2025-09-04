@@ -10,6 +10,9 @@ on:
 
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   NODE_VERION: 22
   REGISTRY: ghcr.io
@@ -61,8 +64,8 @@ jobs:
         run: uv sync
       - name: Check formatting
         run: uv run ruff format --check . 
-  ruff-format:
-    name: Ruff / Format
+  ruff-lint:
+    name: Ruff / Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -77,7 +80,7 @@ jobs:
         run: uv python install
       - name: Install dependencies
         run: uv sync
-      - name: Check formatting
+      - name: Check linting
         run: uv run ruff check . 
   test:
     name: "Test"
@@ -97,6 +100,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
     needs: [test, commitlint]
+    permissions:
+      contents: write
     outputs:
       git-tag: ${{ steps.semantic.outputs.git-tag }}
     steps:
@@ -117,6 +122,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [release]
     if: github.repository_owner == 'Virtool'
+    permissions:
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
