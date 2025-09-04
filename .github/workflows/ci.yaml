@@ -99,7 +99,7 @@ jobs:
     name: "Publish / Release"
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
-    needs: [test, commitlint]
+    needs: [test]
     permissions:
       contents: write
     outputs:
