@@ -2,7 +2,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-from virtool_workflow.data.subtractions import WFNewSubtraction
+from virtool.workflow.data.subtractions import WFNewSubtraction
 
 from workflow import compute_gc_and_count, decompress
 

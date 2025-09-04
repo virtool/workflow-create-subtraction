@@ -1,0 +1,17 @@
+services:
+  test:
+    build:
+      context: .
+      target: test
+    volumes:
+      # Mount entire project directory
+      - .:/workflow
+      # Persistent volumes for build artifacts
+      - venv-data:/workflow/.venv
+      - uv-cache:/tmp/uv_cache
+    working_dir: /workflow
+    command: sleep infinity
+
+volumes:
+  venv-data:
+  uv-cache:

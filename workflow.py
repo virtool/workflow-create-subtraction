@@ -4,9 +4,9 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from virtool.utils import decompress_file, is_gzipped, compress_file
-from virtool_workflow import hooks, step
-from virtool_workflow.data.subtractions import WFNewSubtraction
-from virtool_workflow.runtime.run_subprocess import RunSubprocess
+from virtool.workflow import hooks, step
+from virtool.workflow.data.subtractions import WFNewSubtraction
+from virtool.workflow.runtime.run_subprocess import RunSubprocess
 
 
 @hooks.on_failure
