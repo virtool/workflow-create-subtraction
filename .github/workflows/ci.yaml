@@ -83,7 +83,7 @@ jobs:
       - name: Check linting
         run: uv run ruff check .
   ty:
-    name: Check / Ty
+    name: Ty
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
