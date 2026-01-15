@@ -31,7 +31,10 @@ async def decompress(
         )
     else:
         await asyncio.to_thread(
-            shutil.copyfile, new_subtraction.fasta_path, decompressed_fasta_path
+            lambda: shutil.copyfile(
+                new_subtraction.fasta_path,
+                decompressed_fasta_path,
+            ),
         )
 
 
@@ -84,7 +87,7 @@ async def build_index(
             "-f",
             "--threads",
             str(proc),
-            decompressed_fasta_path,
+            str(decompressed_fasta_path),
             str(bowtie_index_path) + "/subtraction",
         ]
     )
