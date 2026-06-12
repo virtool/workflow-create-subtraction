@@ -14,7 +14,7 @@ async def test_decompress_and_compute_gc(datafiles, mocker, tmp_path: Path):
     decompressed_fasta_path = tmp_path / "decompressed.fa"
 
     new_subtraction = WFNewSubtraction(
-        id="foo",
+        id=1,
         delete=mocker.Mock(),
         finalize=mocker.Mock(),
         name="bar",
