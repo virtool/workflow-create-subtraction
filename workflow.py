@@ -91,53 +91,13 @@ async def compute_gc_and_count(
 
 
 @step
-async def build_index(
-    bowtie_index_path: Path,
-    new_subtraction: WFNewSubtraction,
-    proc: int,
-    run_subprocess: RunSubprocess,
-    work_path: Path,
-):
-    """Build a Bowtie2 index.
-
-    bowtie2-build reads gzip-compressed FASTA natively, so this runs directly
-    against the (possibly compressed) input file without a decompressed
-    intermediate.
-    """
-    fasta_path = new_subtraction.fasta_path
-
-    if not await asyncio.to_thread(is_gzipped, fasta_path):
-        # The input file is always named ``subtraction.fa.gz``, whether or not
-        # it is actually gzipped, but bowtie2-build decides whether to
-        # decompress the reference by extension. Point it at a ``.fa`` symlink
-        # so that an uncompressed upload isn't treated as gzipped.
-        fasta_path = work_path / "subtraction.fa"
-        await asyncio.to_thread(fasta_path.symlink_to, new_subtraction.fasta_path)
-
-    command = [
-        "bowtie2-build",
-        "-f",
-        "--threads",
-        str(proc),
-        str(fasta_path),
-        str(bowtie_index_path / "subtraction"),
-    ]
-
-    process = await run_subprocess(command)
-
-    if process.returncode:
-        raise SubprocessFailedError(command=command, return_code=process.returncode)
-
-
-@step
 async def finalize(
-    bowtie_index_path: Path,
     intermediate: SimpleNamespace,
     new_subtraction: WFNewSubtraction,
     proc: int,
     work_path: Path,
 ):
-    """Upload the subtraction FASTA and index data."""
+    """Upload the subtraction FASTA and finalize the subtraction."""
     if await asyncio.to_thread(is_gzipped, new_subtraction.fasta_path):
         compressed_path = new_subtraction.fasta_path
     else:
@@ -150,17 +110,5 @@ async def finalize(
         )
 
     await new_subtraction.upload(compressed_path)
-
-    # bowtie2-build writes ``.bt2l`` files instead of ``.bt2`` files when the
-    # reference is large enough to need a large index.
-    index_paths = sorted(
-        [*bowtie_index_path.glob("*.bt2"), *bowtie_index_path.glob("*.bt2l")]
-    )
-
-    if not index_paths:
-        raise FileNotFoundError(f"No Bowtie2 index files found in {bowtie_index_path}")
-
-    for path in index_paths:
-        await new_subtraction.upload(path)
 
     await new_subtraction.finalize(intermediate.gc, intermediate.count)

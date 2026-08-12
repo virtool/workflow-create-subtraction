@@ -1,6 +1,5 @@
 FROM python:3.13-bookworm AS deps
 WORKDIR /workflow
-COPY --from=ghcr.io/virtool/tools:1.3.0 /tools/bowtie2/2.5.4/bowtie* /usr/local/bin/
 COPY --from=ghcr.io/virtool/tools:1.3.0 /tools/pigz/2.8/pigz /usr/local/bin/
 COPY --from=ghcr.io/virtool/tools:1.3.0 /tools/seqkit/2.13.0/seqkit /usr/local/bin/
 
